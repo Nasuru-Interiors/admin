@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LogIn, ShieldCheck } from 'lucide-react';
 import { login } from '@/lib/auth';
+import { getPublicBranding, logoThumb } from '@/lib/site';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,6 +12,11 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [logo, setLogo] = useState<string | null>(null);
+
+  useEffect(() => {
+    getPublicBranding().then((b) => setLogo(b.logo_url));
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -36,9 +42,14 @@ export default function LoginPage() {
       />
       <div className="relative w-full max-w-sm">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-gold text-lg font-extrabold text-brand-ink">
-            FC
-          </div>
+          {logo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoThumb(logo)} alt="First Choice Roofing" className="mx-auto mb-4 h-16 w-auto" />
+          ) : (
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center bg-brand-gold text-lg font-extrabold text-brand-ink">
+              FC
+            </div>
+          )}
           <h1 className="text-xl font-bold text-white">First Choice Roofing</h1>
           <p className="mt-1 flex items-center justify-center gap-1.5 text-sm text-white/60">
             <ShieldCheck size={14} className="text-brand-gold" /> Admin Dashboard
