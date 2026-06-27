@@ -18,7 +18,8 @@ export default function HeroPage() {
   if (error) return <p className="text-sm text-red-600">{error}</p>;
   if (!hero) return <p className="text-sm text-gray-400">Loading…</p>;
 
-  const set = <K extends keyof Hero>(k: K, v: Hero[K]) => setHero({ ...hero, [k]: v });
+  const set = <K extends keyof Hero>(k: K, v: Hero[K]) =>
+    setHero((prev) => (prev ? { ...prev, [k]: v } : prev));
 
   async function save() {
     setSaving(true);

@@ -19,7 +19,8 @@ export default function AboutAdminPage() {
   if (error && !a) return <p className="text-sm text-red-600">{error}</p>;
   if (!a) return <p className="text-sm text-gray-400">Loading…</p>;
 
-  const set = <K extends keyof AboutContent>(k: K, v: AboutContent[K]) => setA({ ...a, [k]: v });
+  const set = <K extends keyof AboutContent>(k: K, v: AboutContent[K]) =>
+    setA((prev) => (prev ? { ...prev, [k]: v } : prev));
 
   function setStat(i: number, key: 'label' | 'value', val: string) {
     const stats = [...a!.stats];
