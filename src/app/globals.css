@@ -19,8 +19,8 @@ body {
   outline: none;
 }
 .input:focus {
-  border-color: #e10600;
-  box-shadow: 0 0 0 3px rgba(225, 6, 0, 0.12);
+  border-color: #7b1e2b;
+  box-shadow: 0 0 0 3px rgba(123, 30, 43, 0.12);
 }
 .label {
   display: block;
@@ -40,10 +40,10 @@ body {
   cursor: pointer;
   transition: all 0.15s;
 }
-.btn-primary { background: #e10600; color: #fff; }
-.btn-primary:hover { background: #b10500; }
+.btn-primary { background: #7b1e2b; color: #fff; }
+.btn-primary:hover { background: #4a0e1a; }
 .btn-ghost { background: #fff; border: 1px solid #d8dce0; color: #1a1a1a; }
-.btn-ghost:hover { border-color: #e10600; }
+.btn-ghost:hover { border-color: #7b1e2b; }
 .card {
   background: #fff;
   border: 1px solid #eceef0;
@@ -63,6 +63,6 @@ body {
 .tiptap h3 { font-size: 1.15rem; font-weight: 700; margin: 1rem 0 0.5rem; }
 .tiptap ul { list-style: disc; margin-left: 1.4rem; }
 .tiptap ol { list-style: decimal; margin-left: 1.4rem; }
-.tiptap a { color: #e10600; text-decoration: underline; }
+.tiptap a { color: #7b1e2b; text-decoration: underline; }
 .tiptap img { max-width: 100%; border-radius: 0.5rem; margin: 0.8rem 0; }
-.tiptap blockquote { border-left: 3px solid #e10600; padding-left: 1rem; color: #555; }
+.tiptap blockquote { border-left: 3px solid #7b1e2b; padding-left: 1rem; color: #555; }
