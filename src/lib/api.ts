@@ -1,27 +1,27 @@
 'use client';
 
-import { createSupabaseBrowser } from './supabase-browser';
+import { getToken, clearToken } from './auth';
 
 const BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
 
-async function authHeader(): Promise<Record<string, string>> {
-  const supabase = createSupabaseBrowser();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
-}
-
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+  const token = getToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(await authHeader()),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
   const res = await fetch(`${BASE}/api/admin${path}`, {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
   });
+
+  // Session expired / invalid — drop the token and bounce to login.
+  if (res.status === 401) {
+    clearToken();
+    if (typeof window !== 'undefined') window.location.href = '/login';
+    throw new Error('Session expired. Please sign in again.');
+  }
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
     try {

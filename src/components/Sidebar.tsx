@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { logout } from '@/lib/auth';
 
 const LINKS = [
   { href: '/', label: 'Dashboard' },
@@ -18,11 +18,9 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  async function logout() {
-    const supabase = createSupabaseBrowser();
-    await supabase.auth.signOut();
+  function handleLogout() {
+    logout();
     router.replace('/login');
-    router.refresh();
   }
 
   const isActive = (href: string) =>
@@ -52,7 +50,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="border-t border-gray-100 p-3">
-        <button onClick={logout} className="btn btn-ghost w-full justify-center">
+        <button onClick={handleLogout} className="btn btn-ghost w-full justify-center">
           Log out
         </button>
       </div>
