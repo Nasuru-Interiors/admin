@@ -90,5 +90,5 @@ body {
 .tiptap ul { list-style: disc; margin-left: 1.4rem; }
 .tiptap ol { list-style: decimal; margin-left: 1.4rem; }
 .tiptap a { color: #7b1e2b; text-decoration: underline; }
-.tiptap img { max-width: 100%; border-radius: 0.5rem; margin: 0.8rem 0; }
+.tiptap img { max-width: 100%; border-radius: 0; margin: 0.8rem 0; }
 .tiptap blockquote { border-left: 3px solid #c9a227; padding-left: 1rem; color: #555; }
