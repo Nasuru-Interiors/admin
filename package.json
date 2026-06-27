@@ -13,8 +13,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.5.1",
-    "@supabase/supabase-js": "^2.45.4",
     "@tiptap/extension-image": "^2.8.0",
     "@tiptap/extension-link": "^2.8.0",
     "@tiptap/pm": "^2.8.0",

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createSupabaseBrowser } from '@/lib/supabase-browser';
+import { login } from '@/lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,15 +15,13 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const supabase = createSupabaseBrowser();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) {
-      setError(error.message);
-      return;
+    try {
+      await login(email, password);
+      router.replace('/');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed');
+      setLoading(false);
     }
-    router.replace('/');
-    router.refresh();
   }
 
   return (
@@ -46,6 +44,7 @@ export default function LoginPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="admin@firstchoice.com"
+          autoComplete="username"
         />
 
         <label className="label">Password</label>
@@ -56,6 +55,7 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="••••••••"
+          autoComplete="current-password"
         />
 
         <button type="submit" disabled={loading} className="btn btn-primary w-full justify-center">

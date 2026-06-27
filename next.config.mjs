@@ -8,15 +8,12 @@ function origin(url) {
   }
 }
 
-// Origins the admin browser legitimately connects to.
+// Origins the admin browser legitimately connects to (backend + Cloudinary only;
+// the admin never connects to Supabase).
 const backend = origin(process.env.NEXT_PUBLIC_BACKEND_URL || '');
-const supabase = origin(process.env.NEXT_PUBLIC_SUPABASE_URL || '');
-const supabaseWs = supabase.replace(/^https/, 'wss');
 const connectSrc = [
   "'self'",
   backend,
-  supabase,
-  supabaseWs,
   'https://api.cloudinary.com',
   ...(isDev ? ['ws://localhost:*'] : []),
 ]
