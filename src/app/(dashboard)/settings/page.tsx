@@ -36,7 +36,8 @@ export default function SettingsPage() {
   if (error && !s) return <p className="text-sm text-red-600">{error}</p>;
   if (!s) return <p className="text-sm text-gray-400">Loading…</p>;
 
-  const set = <K extends keyof SiteSettings>(k: K, v: SiteSettings[K]) => setS({ ...s, [k]: v });
+  const set = <K extends keyof SiteSettings>(k: K, v: SiteSettings[K]) =>
+    setS((prev) => (prev ? { ...prev, [k]: v } : prev));
 
   async function save() {
     setSaving(true);
