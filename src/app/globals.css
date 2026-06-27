@@ -2,56 +2,82 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --brand-primary: #7b1e2b;
+  --brand-gold: #c9a227;
+}
+
 body {
-  background: #f6f7f9;
-  color: #1a1a1a;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #f5f2f0;
+  color: #2a1418;
+  font-family: var(--font-sans), 'Segoe UI', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* form controls */
-.input {
-  width: 100%;
-  border: 1px solid #d8dce0;
-  border-radius: 0.6rem;
-  padding: 0.6rem 0.8rem;
-  font-size: 0.9rem;
-  background: #fff;
-  outline: none;
-}
-.input:focus {
-  border-color: #7b1e2b;
-  box-shadow: 0 0 0 3px rgba(123, 30, 43, 0.12);
-}
-.label {
-  display: block;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #444;
-  margin-bottom: 0.35rem;
-}
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  border-radius: 0.6rem;
-  padding: 0.6rem 1.1rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.btn-primary { background: #7b1e2b; color: #fff; }
-.btn-primary:hover { background: #4a0e1a; }
-.btn-ghost { background: #fff; border: 1px solid #d8dce0; color: #1a1a1a; }
-.btn-ghost:hover { border-color: #7b1e2b; }
-.card {
-  background: #fff;
-  border: 1px solid #eceef0;
-  border-radius: 1rem;
-  padding: 1.5rem;
+@layer components {
+  /* ---- Form controls ---- */
+  .input {
+    @apply w-full rounded-lg border border-black/10 bg-white px-3.5 py-2.5 text-sm text-brand-ink outline-none transition placeholder:text-gray-400;
+  }
+  .input:focus {
+    @apply border-brand-primary;
+    box-shadow: 0 0 0 3px rgba(123, 30, 43, 0.12);
+  }
+  .label {
+    @apply mb-1.5 block text-xs font-semibold text-brand-muted;
+  }
+
+  /* ---- Buttons ---- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply btn bg-brand-primary text-white hover:bg-brand-dark hover:shadow-soft;
+  }
+  .btn-gold {
+    @apply btn bg-brand-gold text-brand-ink hover:brightness-105;
+  }
+  .btn-ghost {
+    @apply btn border border-black/10 bg-white text-brand-ink hover:border-brand-primary hover:text-brand-primary;
+  }
+  .btn-danger {
+    @apply btn bg-white text-red-600 ring-1 ring-inset ring-red-200 hover:bg-red-50;
+  }
+
+  /* ---- Surfaces ---- */
+  .card {
+    @apply rounded-2xl border border-black/5 bg-white p-6 shadow-soft;
+  }
+
+  /* ---- Badges ---- */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+  .badge-green { @apply bg-green-100 text-green-700; }
+  .badge-gray { @apply bg-gray-100 text-gray-600; }
+  .badge-gold { @apply bg-brand-gold/15 text-[#8a6d12]; }
+
+  /* ---- Page header ---- */
+  .page-title {
+    @apply text-2xl font-bold tracking-tight text-brand-ink;
+  }
+  .page-subtitle {
+    @apply mt-1 text-sm text-brand-muted;
+  }
+
+  /* ---- Tables ---- */
+  .data-table {
+    @apply w-full text-sm;
+  }
+  .data-table thead {
+    @apply border-b border-black/5 bg-brand-bg/60 text-left text-xs uppercase tracking-wide text-brand-muted;
+  }
+  .data-table th { @apply px-4 py-3 font-semibold; }
+  .data-table tbody tr { @apply border-b border-black/5 transition-colors last:border-0 hover:bg-brand-bg/50; }
+  .data-table td { @apply px-4 py-3; }
 }
 
-/* Tiptap editor */
+/* ---- Tiptap editor ---- */
 .tiptap {
   min-height: 320px;
   padding: 1rem;
@@ -65,4 +91,4 @@ body {
 .tiptap ol { list-style: decimal; margin-left: 1.4rem; }
 .tiptap a { color: #7b1e2b; text-decoration: underline; }
 .tiptap img { max-width: 100%; border-radius: 0.5rem; margin: 0.8rem 0; }
-.tiptap blockquote { border-left: 3px solid #7b1e2b; padding-left: 1rem; color: #555; }
+.tiptap blockquote { border-left: 3px solid #c9a227; padding-left: 1rem; color: #555; }

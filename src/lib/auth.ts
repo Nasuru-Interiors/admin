@@ -21,12 +21,19 @@ export function clearToken() {
 }
 
 /** Decode the JWT payload without verifying (verification is the backend's job). */
-function decode(token: string): { exp?: number } | null {
+function decode(token: string): { exp?: number; email?: string } | null {
   try {
     return JSON.parse(atob(token.split('.')[1]));
   } catch {
     return null;
   }
+}
+
+/** The signed-in admin's email, read from the token (display only). */
+export function getAdminEmail(): string | null {
+  const token = getToken();
+  if (!token) return null;
+  return decode(token)?.email ?? null;
 }
 
 /** Cheap client-side check: do we have a token that hasn't obviously expired? */

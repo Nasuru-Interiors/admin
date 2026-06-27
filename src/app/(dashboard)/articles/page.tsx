@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { ArticleListItem } from '@/lib/types';
 
@@ -33,60 +34,64 @@ export default function ArticlesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-extrabold text-brand-ink">Articles</h1>
-        <Link href="/articles/new" className="btn btn-primary">
-          + New Article
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="page-title">Articles</h1>
+          <p className="page-subtitle">Create, edit and publish blog posts.</p>
+        </div>
+        <Link href="/articles/new" className="btn-primary">
+          <Plus size={18} /> New Article
         </Link>
       </div>
 
-      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+      {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
-      <div className="mt-6 overflow-hidden rounded-xl border border-gray-200 bg-white">
+      <div className="overflow-hidden rounded-2xl border border-black/5 bg-white shadow-soft">
         {loading ? (
-          <p className="p-6 text-sm text-gray-400">Loading…</p>
+          <p className="p-6 text-sm text-brand-muted">Loading…</p>
         ) : items.length === 0 ? (
-          <p className="p-6 text-sm text-gray-400">No articles yet. Create your first one.</p>
+          <div className="p-12 text-center">
+            <p className="font-semibold text-brand-ink">No articles yet</p>
+            <p className="mt-1 text-sm text-brand-muted">Create your first one to get started.</p>
+            <Link href="/articles/new" className="btn-primary mt-5 inline-flex">
+              <Plus size={18} /> New Article
+            </Link>
+          </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="border-b border-gray-100 bg-gray-50 text-left text-xs uppercase text-gray-400">
+          <table className="data-table">
+            <thead>
               <tr>
-                <th className="px-4 py-3">Title</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Updated</th>
-                <th className="px-4 py-3"></th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Updated</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               {items.map((a) => (
-                <tr key={a.id} className="border-b border-gray-50 last:border-0">
-                  <td className="px-4 py-3 font-semibold text-brand-ink">
+                <tr key={a.id}>
+                  <td className="font-semibold text-brand-ink">
                     {a.title}
-                    {a.featured && <span className="ml-2 text-xs text-brand-primary">★ featured</span>}
+                    {a.featured && <span className="badge badge-gold ml-2">★ Featured</span>}
                   </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                        a.status === 'published'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-500'
-                      }`}
-                    >
+                  <td>
+                    <span className={`badge ${a.status === 'published' ? 'badge-green' : 'badge-gray'}`}>
                       {a.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-400">
-                    {new Date(a.updated_at).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <Link href={`/articles/${a.id}`} className="font-semibold text-brand-primary">
-                      Edit
+                  <td className="text-brand-muted">{new Date(a.updated_at).toLocaleDateString()}</td>
+                  <td className="text-right">
+                    <Link
+                      href={`/articles/${a.id}`}
+                      className="inline-flex items-center gap-1 font-semibold text-brand-primary hover:underline"
+                    >
+                      <Pencil size={14} /> Edit
                     </Link>
                     <button
                       onClick={() => remove(a.id)}
-                      className="ml-4 font-semibold text-gray-400 hover:text-red-600"
+                      className="ml-4 inline-flex items-center gap-1 font-semibold text-brand-muted hover:text-red-600"
                     >
-                      Delete
+                      <Trash2 size={14} /> Delete
                     </button>
                   </td>
                 </tr>

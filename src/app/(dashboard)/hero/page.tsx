@@ -40,7 +40,7 @@ export default function HeroPage() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-extrabold text-brand-ink">Hero Designer</h1>
+        <h1 className="page-title">Hero Designer</h1>
         <button onClick={save} disabled={saving} className="btn btn-primary">
           {saving ? 'Saving…' : 'Save Hero'}
         </button>

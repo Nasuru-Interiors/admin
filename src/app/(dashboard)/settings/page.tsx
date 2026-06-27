@@ -56,7 +56,7 @@ export default function SettingsPage() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-extrabold text-brand-ink">Business &amp; SEO</h1>
+        <h1 className="page-title">Business &amp; SEO</h1>
         <button onClick={save} disabled={saving} className="btn btn-primary">
           {saving ? 'Saving…' : 'Save'}
         </button>

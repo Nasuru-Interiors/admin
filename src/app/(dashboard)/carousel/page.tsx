@@ -66,7 +66,7 @@ export default function CarouselPage() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-extrabold text-brand-ink">Carousel</h1>
+        <h1 className="page-title">Carousel</h1>
         <label className="btn btn-primary cursor-pointer">
           {busy ? 'Uploading…' : '+ Add Slide'}
           <input type="file" accept="image/*" className="hidden" onChange={onUpload} disabled={busy} />
