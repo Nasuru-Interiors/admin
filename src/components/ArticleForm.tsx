@@ -72,9 +72,7 @@ export default function ArticleForm({ initial }: { initial: ArticleFormValues })
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-extrabold text-brand-ink">
-          {v.id ? 'Edit Article' : 'New Article'}
-        </h1>
+        <h1 className="page-title">{v.id ? 'Edit Article' : 'New Article'}</h1>
         <div className="flex gap-2">
           <button disabled={saving} onClick={() => save('draft')} className="btn btn-ghost">
             Save Draft

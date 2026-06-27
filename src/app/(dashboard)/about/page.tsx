@@ -45,7 +45,7 @@ export default function AboutAdminPage() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-extrabold text-brand-ink">About Page</h1>
+        <h1 className="page-title">About Page</h1>
         <button onClick={save} disabled={saving} className="btn btn-primary">
           {saving ? 'Saving…' : 'Save'}
         </button>

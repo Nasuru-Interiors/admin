@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { LogIn, ShieldCheck } from 'lucide-react';
 import { login } from '@/lib/auth';
 
 export default function LoginPage() {
@@ -25,43 +26,62 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-brand-ink px-5">
-      <form onSubmit={onSubmit} className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-xl">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-brand-dark px-5">
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(60% 80% at 50% 0%, rgba(201,162,39,0.16) 0%, rgba(201,162,39,0) 60%)',
+        }}
+      />
+      <div className="relative w-full max-w-sm">
         <div className="mb-6 text-center">
-          <h1 className="text-xl font-extrabold text-brand-primary">First Choice Roofing</h1>
-          <p className="mt-1 text-sm text-gray-500">Admin Dashboard</p>
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-gold text-lg font-extrabold text-brand-ink">
+            FC
+          </div>
+          <h1 className="text-xl font-bold text-white">First Choice Roofing</h1>
+          <p className="mt-1 flex items-center justify-center gap-1.5 text-sm text-white/60">
+            <ShieldCheck size={14} className="text-brand-gold" /> Admin Dashboard
+          </p>
         </div>
 
-        {error && (
-          <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</div>
-        )}
+        <form onSubmit={onSubmit} className="rounded-2xl bg-white p-7 shadow-card">
+          {error && (
+            <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</div>
+          )}
 
-        <label className="label">Email</label>
-        <input
-          type="email"
-          required
-          className="input mb-4"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="admin@firstchoice.com"
-          autoComplete="username"
-        />
+          <label className="label">Email</label>
+          <input
+            type="email"
+            required
+            className="input mb-4"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="admin@firstchoiceroofingservice.com"
+            autoComplete="username"
+          />
 
-        <label className="label">Password</label>
-        <input
-          type="password"
-          required
-          className="input mb-6"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="••••••••"
-          autoComplete="current-password"
-        />
+          <label className="label">Password</label>
+          <input
+            type="password"
+            required
+            className="input mb-6"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            autoComplete="current-password"
+          />
 
-        <button type="submit" disabled={loading} className="btn btn-primary w-full justify-center">
-          {loading ? 'Signing in…' : 'Sign In'}
-        </button>
-      </form>
+          <button type="submit" disabled={loading} className="btn-primary w-full">
+            <LogIn size={18} />
+            {loading ? 'Signing in…' : 'Sign In'}
+          </button>
+        </form>
+
+        <p className="mt-5 text-center text-xs text-white/40">
+          © {new Date().getFullYear()} First Choice Roofing Services
+        </p>
+      </div>
     </div>
   );
 }
