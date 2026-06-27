@@ -6,10 +6,11 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          DEFAULT: '#E10600',
-          primary: '#E10600',
-          dark: '#B10500',
-          ink: '#1A1A1A',
+          DEFAULT: '#7B1E2B',
+          primary: '#7B1E2B',
+          dark: '#4A0E1A',
+          gold: '#C9A227',
+          ink: '#2A1418',
         },
       },
     },
