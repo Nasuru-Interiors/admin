@@ -45,6 +45,7 @@ export interface SiteSettings {
   default_hero_color: string;
   phone: string;
   whatsapp: string;
+  whatsapp_greeting: string;
   email: string;
   address: string;
   city: string;

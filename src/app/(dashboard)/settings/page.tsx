@@ -80,6 +80,19 @@ export default function SettingsPage() {
             placeholder="2348012345678"
             hint="Powers the WhatsApp chat widget on your website. Include the country code (234 for Nigeria), with no + or spaces."
           />
+          <div>
+            <label className="label">WhatsApp greeting message</label>
+            <textarea
+              className="input"
+              rows={3}
+              value={s.whatsapp_greeting}
+              onChange={(e) => set('whatsapp_greeting', e.target.value)}
+              placeholder="Welcome message shown in the chat widget"
+            />
+            <p className="mt-1 text-xs text-brand-muted">
+              The greeting visitors see when they open the WhatsApp widget.
+            </p>
+          </div>
           <Field label="Email" value={s.email} onChange={(v) => set('email', v)} />
           <Field label="Address" value={s.address} onChange={(v) => set('address', v)} />
           <div className="grid grid-cols-3 gap-3">
