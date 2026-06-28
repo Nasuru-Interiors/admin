@@ -9,16 +9,19 @@ function Field({
   value,
   onChange,
   placeholder,
+  hint,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
+  hint?: string;
 }) {
   return (
     <div>
       <label className="label">{label}</label>
       <input className="input" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
+      {hint && <p className="mt-1 text-xs text-brand-muted">{hint}</p>}
     </div>
   );
 }
@@ -70,7 +73,13 @@ export default function SettingsPage() {
           <Field label="Business name" value={s.business_name} onChange={(v) => set('business_name', v)} />
           <Field label="Tagline" value={s.tagline} onChange={(v) => set('tagline', v)} />
           <Field label="Phone" value={s.phone} onChange={(v) => set('phone', v)} />
-          <Field label="WhatsApp" value={s.whatsapp} onChange={(v) => set('whatsapp', v)} />
+          <Field
+            label="WhatsApp number"
+            value={s.whatsapp}
+            onChange={(v) => set('whatsapp', v)}
+            placeholder="2348012345678"
+            hint="Powers the WhatsApp chat widget on your website. Include the country code (234 for Nigeria), with no + or spaces."
+          />
           <Field label="Email" value={s.email} onChange={(v) => set('email', v)} />
           <Field label="Address" value={s.address} onChange={(v) => set('address', v)} />
           <div className="grid grid-cols-3 gap-3">
