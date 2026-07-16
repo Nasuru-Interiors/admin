@@ -127,6 +127,16 @@ export default function SettingsPage() {
             <Field label="Instagram URL" value={s.instagram_url} onChange={(v) => set('instagram_url', v)} />
             <Field label="Twitter / X URL" value={s.twitter_url} onChange={(v) => set('twitter_url', v)} />
             <Field label="LinkedIn URL" value={s.linkedin_url} onChange={(v) => set('linkedin_url', v)} />
+            <Field
+              label="TikTok URL"
+              value={s.tiktok_url}
+              onChange={(v) => set('tiktok_url', v)}
+              placeholder="https://www.tiktok.com/@yourhandle"
+            />
+            <p className="text-xs text-brand-muted">
+              Social links appear in the footer and are sent to Google as your official profiles
+              (sameAs structured data).
+            </p>
           </div>
 
           <div className="card space-y-4">
