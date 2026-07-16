@@ -81,6 +81,13 @@ export interface AboutContent {
   team: { name: string; role: string; image_url?: string }[];
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+}
+
 export interface Stats {
   articles: number;
   published: number;

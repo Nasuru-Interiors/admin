@@ -29,6 +29,7 @@ export default function EditArticlePage() {
           status: a.status,
           featured: a.featured,
           author: a.author || 'First Choice Roofing Services',
+          category_ids: (a.article_categories ?? []).map((c) => c.category_id),
         }),
       )
       .catch((e) => setError(e.message));

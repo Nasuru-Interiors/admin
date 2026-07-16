@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import {
   LayoutDashboard,
   FileText,
+  Tags,
   Image as ImageIcon,
   GalleryHorizontalEnd,
   Palette,
@@ -28,6 +29,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/articles', label: 'Articles', icon: FileText },
+  { href: '/categories', label: 'Categories', icon: Tags },
   { href: '/hero', label: 'Hero Designer', icon: ImageIcon },
   { href: '/carousel', label: 'Carousel', icon: GalleryHorizontalEnd },
   { href: '/appearance', label: 'Appearance', icon: Palette },
