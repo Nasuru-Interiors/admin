@@ -57,6 +57,7 @@ export interface SiteSettings {
   instagram_url: string;
   twitter_url: string;
   linkedin_url: string;
+  tiktok_url: string;
   default_meta_title: string;
   default_meta_description: string;
 }
