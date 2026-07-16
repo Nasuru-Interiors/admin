@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { api } from '@/lib/api';
+import type { Category } from '@/lib/types';
 import Editor from './Editor';
 import ImageUpload from './ImageUpload';
 
@@ -20,6 +22,7 @@ export interface ArticleFormValues {
   status: 'draft' | 'published';
   featured: boolean;
   author: string;
+  category_ids: string[];
 }
 
 export const EMPTY_ARTICLE: ArticleFormValues = {
@@ -35,6 +38,7 @@ export const EMPTY_ARTICLE: ArticleFormValues = {
   status: 'draft',
   featured: false,
   author: 'First Choice Roofing Services',
+  category_ids: [],
 };
 
 export default function ArticleForm({ initial }: { initial: ArticleFormValues }) {
@@ -43,6 +47,19 @@ export default function ArticleForm({ initial }: { initial: ArticleFormValues })
   const [keywordsText, setKeywordsText] = useState(initial.keywords.join(', '));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    api.get<Category[]>('/categories').then(setCategories).catch(() => setCategories([]));
+  }, []);
+
+  const toggleCategory = (id: string) =>
+    setV((prev) => ({
+      ...prev,
+      category_ids: prev.category_ids.includes(id)
+        ? prev.category_ids.filter((c) => c !== id)
+        : [...prev.category_ids, id],
+    }));
 
   const set = <K extends keyof ArticleFormValues>(key: K, val: ArticleFormValues[K]) =>
     setV((prev) => ({ ...prev, [key]: val }));
@@ -151,6 +168,33 @@ export default function ArticleForm({ initial }: { initial: ArticleFormValues })
               <label className="label">Author</label>
               <input className="input" value={v.author} onChange={(e) => set('author', e.target.value)} />
             </div>
+          </div>
+
+          <div className="card space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-bold text-brand-ink">Categories</p>
+              <Link href="/categories" className="text-xs font-semibold text-brand-primary hover:underline">
+                Manage
+              </Link>
+            </div>
+            {categories.length === 0 ? (
+              <p className="text-sm text-brand-muted">
+                No categories yet — <Link href="/categories" className="text-brand-primary underline">create one</Link>.
+              </p>
+            ) : (
+              <div className="max-h-44 space-y-2 overflow-y-auto">
+                {categories.map((c) => (
+                  <label key={c.id} className="flex cursor-pointer items-center gap-2 text-sm text-brand-ink">
+                    <input
+                      type="checkbox"
+                      checked={v.category_ids.includes(c.id)}
+                      onChange={() => toggleCategory(c.id)}
+                    />
+                    {c.name}
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="card space-y-3">
