@@ -1,7 +1,7 @@
 'use client';
 
 // Token-based admin auth. The admin app talks ONLY to the backend — it never
-// connects to Supabase. The backend verifies credentials server-side and returns
+// connects to the database directly. The backend verifies credentials server-side and returns
 // a signed JWT, which we store and send as a Bearer token on every API call.
 
 const BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
