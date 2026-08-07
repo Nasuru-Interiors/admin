@@ -101,7 +101,12 @@ export default function SettingsPage() {
             </p>
           </div>
           <Field label="Email" value={s.email} onChange={(v) => set('email', v)} />
-          <Field label="Address" value={s.address} onChange={(v) => set('address', v)} />
+          <Field
+            label="Street / Physical Address"
+            value={s.address}
+            onChange={(v) => set('address', v)}
+            placeholder="e.g. Plot 10 Commercial Avenue, Ikeja"
+          />
           <div className="grid grid-cols-3 gap-3">
             <Field label="City" value={s.city} onChange={(v) => set('city', v)} />
             <Field label="State" value={s.state} onChange={(v) => set('state', v)} />
