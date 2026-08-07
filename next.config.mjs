@@ -9,7 +9,7 @@ function origin(url) {
 }
 
 // Origins the admin browser legitimately connects to (backend + Cloudinary only;
-// the admin never connects to Supabase).
+// the admin never connects to the database directly).
 const backend = origin(process.env.NEXT_PUBLIC_BACKEND_URL || '');
 const connectSrc = [
   "'self'",

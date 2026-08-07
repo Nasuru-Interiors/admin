@@ -72,6 +72,13 @@ export default function SettingsPage() {
           <p className="text-sm font-bold text-brand-ink">Business</p>
           <Field label="Business name" value={s.business_name} onChange={(v) => set('business_name', v)} />
           <Field label="Tagline" value={s.tagline} onChange={(v) => set('tagline', v)} />
+          <Field
+            label="Footer copyright text"
+            value={s.copyright_text ?? ''}
+            onChange={(v) => set('copyright_text', v)}
+            placeholder="© {year} {business_name}. Premium aluminium roofing sheets in Lagos, Nigeria."
+            hint="Custom footer copyright. Supports {business_name} (uses Business name above) and {year} placeholders."
+          />
           <Field label="Phone" value={s.phone} onChange={(v) => set('phone', v)} />
           <Field
             label="WhatsApp number"
