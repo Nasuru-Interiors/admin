@@ -18,21 +18,21 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          DEFAULT: '#7B1E2B',
-          primary: '#7B1E2B',
-          dark: '#4A0E1A',
+          DEFAULT: '#2F5D8C',
+          primary: '#2F5D8C',
+          dark: '#1B3A5C',
           gold: '#C9A227',
-          ink: '#2A1418',
-          bg: '#F5F2F0',
-          muted: '#6B5A5E',
+          ink: '#14212F',
+          bg: '#EEF2F7',
+          muted: '#5A6878',
         },
       },
       fontFamily: {
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        soft: '0 1px 2px rgba(42,20,24,0.04), 0 8px 24px -16px rgba(42,20,24,0.25)',
-        card: '0 1px 3px rgba(42,20,24,0.06), 0 14px 32px -20px rgba(42,20,24,0.30)',
+        soft: '0 1px 2px rgba(20,33,47,0.04), 0 8px 24px -16px rgba(20,33,47,0.25)',
+        card: '0 1px 3px rgba(20,33,47,0.06), 0 14px 32px -20px rgba(20,33,47,0.30)',
       },
     },
   },

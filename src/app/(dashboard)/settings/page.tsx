@@ -76,7 +76,7 @@ export default function SettingsPage() {
             label="Footer copyright text"
             value={s.copyright_text ?? ''}
             onChange={(v) => set('copyright_text', v)}
-            placeholder="© {year} {business_name}. Premium aluminium roofing sheets in Lagos, Nigeria."
+            placeholder="© {year} {business_name}. Interior decor supplies for beautiful homes and spaces."
             hint="Custom footer copyright. Supports {business_name} (uses Business name above) and {year} placeholders."
           />
           <Field label="Phone" value={s.phone} onChange={(v) => set('phone', v)} />
