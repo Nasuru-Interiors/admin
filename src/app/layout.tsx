@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const favicon = faviconFrom(branding.logo_url);
   return {
     title: `${branding.business_name} — Admin`,
-    description: 'Admin dashboard for First Choice Roofing Services.',
+    description: 'Admin dashboard for Nasuru Interios.',
     robots: { index: false, follow: false },
     ...(favicon ? { icons: { icon: favicon, shortcut: favicon, apple: favicon } } : {}),
   };

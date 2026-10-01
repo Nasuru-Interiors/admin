@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 :root {
-  --brand-primary: #7b1e2b;
+  --brand-primary: #2F5D8C;
   --brand-gold: #c9a227;
 }
 
 body {
-  background: #f5f2f0;
-  color: #2a1418;
+  background: #EEF2F7;
+  color: #14212F;
   font-family: var(--font-sans), 'Segoe UI', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -21,7 +21,7 @@ body {
   }
   .input:focus {
     @apply border-brand-primary;
-    box-shadow: 0 0 0 3px rgba(123, 30, 43, 0.12);
+    box-shadow: 0 0 0 3px rgba(47, 93, 140, 0.12);
   }
   .label {
     @apply mb-1.5 block text-xs font-semibold text-brand-muted;
@@ -89,6 +89,6 @@ body {
 .tiptap h3 { font-size: 1.15rem; font-weight: 700; margin: 1rem 0 0.5rem; }
 .tiptap ul { list-style: disc; margin-left: 1.4rem; }
 .tiptap ol { list-style: decimal; margin-left: 1.4rem; }
-.tiptap a { color: #7b1e2b; text-decoration: underline; }
+.tiptap a { color: #2F5D8C; text-decoration: underline; }
 .tiptap img { max-width: 100%; border-radius: 0; margin: 0.8rem 0; }
 .tiptap blockquote { border-left: 3px solid #c9a227; padding-left: 1rem; color: #555; }

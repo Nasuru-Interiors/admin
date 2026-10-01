@@ -37,7 +37,7 @@ export const EMPTY_ARTICLE: ArticleFormValues = {
   keywords: [],
   status: 'draft',
   featured: false,
-  author: 'First Choice Roofing Services',
+  author: 'Nasuru Interios',
   category_ids: [],
 };
 
@@ -112,7 +112,7 @@ export default function ArticleForm({ initial }: { initial: ArticleFormValues })
                 className="input"
                 value={v.title}
                 onChange={(e) => set('title', e.target.value)}
-                placeholder="e.g. 5 Reasons Aluminium Roofing Sheets Are Best for Lagos Homes"
+                placeholder="e.g. 10 Wallpaper Ideas to Transform a Small Living Room"
               />
             </div>
             <div>
@@ -223,7 +223,7 @@ export default function ArticleForm({ initial }: { initial: ArticleFormValues })
                 className="input"
                 value={keywordsText}
                 onChange={(e) => setKeywordsText(e.target.value)}
-                placeholder="aluminium roofing sheets, Lagos, Nigeria"
+                placeholder="interior decor, wallpaper, curtains, wall panels"
               />
             </div>
           </div>

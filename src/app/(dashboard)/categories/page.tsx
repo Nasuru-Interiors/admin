@@ -81,7 +81,7 @@ export default function CategoriesPage() {
             className="input"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Roofing Tips"
+            placeholder="e.g. Wallpaper Ideas"
           />
         </div>
         <button type="submit" disabled={creating || !name.trim()} className="btn-primary">
