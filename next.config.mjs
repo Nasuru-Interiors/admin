@@ -45,8 +45,6 @@ const securityHeaders = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // The admin is served under /admin on the shared domain (see root vercel.json).
-  basePath: '/admin',
   reactStrictMode: true,
   poweredByHeader: false,
   eslint: { ignoreDuringBuilds: true },
