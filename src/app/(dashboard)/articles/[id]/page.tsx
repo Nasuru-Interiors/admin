@@ -28,7 +28,7 @@ export default function EditArticlePage() {
           keywords: a.keywords || [],
           status: a.status,
           featured: a.featured,
-          author: a.author || 'Nasuru Interios',
+          author: a.author || 'Nasuru Interiors',
           category_ids: (a.article_categories ?? []).map((c) => c.category_id),
         }),
       )
