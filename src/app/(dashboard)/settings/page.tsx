@@ -137,11 +137,15 @@ export default function SettingsPage() {
             <p className="text-sm font-bold text-brand-ink">Social Links</p>
             <Field label="Facebook URL" value={s.facebook_url} onChange={(v) => set('facebook_url', v)} />
             <Field label="Instagram URL" value={s.instagram_url} onChange={(v) => set('instagram_url', v)} />
-            <Field label="Twitter / X URL" value={s.twitter_url} onChange={(v) => set('twitter_url', v)} />
-            <Field label="LinkedIn URL" value={s.linkedin_url} onChange={(v) => set('linkedin_url', v)} />
+            <Field
+              label="YouTube URL"
+              value={s.youtube_url ?? ''}
+              onChange={(v) => set('youtube_url', v)}
+              placeholder="https://www.youtube.com/@yourchannel"
+            />
             <Field
               label="TikTok URL"
-              value={s.tiktok_url}
+              value={s.tiktok_url ?? ''}
               onChange={(v) => set('tiktok_url', v)}
               placeholder="https://www.tiktok.com/@yourhandle"
             />
