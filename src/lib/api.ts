@@ -72,3 +72,10 @@ export const api = {
     retryDelivery: (deliveryId: string) => request<{ ok: boolean; message: string }>('POST', `/webhooks/deliveries/${deliveryId}/retry`),
   },
 };
+
+// Helper to get full inbound URL
+export function getInboundUrl(path?: string | null): string | null {
+  if (!path) return null;
+  const base = BASE.replace('/api/admin', '');
+  return `${base}${path}`;
+}

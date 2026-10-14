@@ -18,7 +18,7 @@ import {
   EyeOff,
   Loader2,
 } from 'lucide-react';
-import { api } from '@/lib/api';
+import { api, getInboundUrl } from '@/lib/api';
 import type {
   WebhookEndpoint,
   WebhookEndpointListItem,
@@ -423,7 +423,7 @@ export default function WebhooksPage() {
               ) : (
                 endpoints.map((endpoint) => {
                   const isInbound = endpoint.is_inbound;
-                  const displayUrl = isInbound ? endpoint.inbound_url : endpoint.url;
+                  const displayUrl = isInbound ? getInboundUrl(endpoint.inbound_url) : endpoint.url;
                   return (
                     <tr key={endpoint.id} className="hover:bg-gray-50">
                       <td className="py-4 px-4">
