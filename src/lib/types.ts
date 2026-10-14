@@ -118,6 +118,9 @@ export interface WebhookEndpoint {
   created_at: string;
   updated_at: string;
   sourceIdentifier?: string;
+  inbound_url?: string | null;
+  is_inbound?: boolean;
+  isInbound?: boolean; // For form handling
 }
 
 export interface WebhookEndpointListItem {
@@ -131,6 +134,8 @@ export interface WebhookEndpointListItem {
   created_at: string;
   updated_at: string;
   sourceIdentifier?: string;
+  inbound_url?: string | null;
+  is_inbound?: boolean;
 }
 
 export interface WebhookDelivery {

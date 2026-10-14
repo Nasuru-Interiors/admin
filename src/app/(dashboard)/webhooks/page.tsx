@@ -271,8 +271,8 @@ export default function WebhooksPage() {
     if (Object.keys(formErrors).length) return;
 
     const submitData = mode === 'inbound'
-      ? { ...formData, url: formData.sourceIdentifier, events: [] }
-      : formData;
+      ? { ...formData, url: formData.sourceIdentifier, events: [], isInbound: true }
+      : { ...formData, isInbound: false };
 
     const submit = editingEndpoint
       ? api.webhooks.update(editingEndpoint.id, submitData)
@@ -292,9 +292,9 @@ export default function WebhooksPage() {
 
   function resetForm() {
     if (mode === 'inbound') {
-      setFormData({ name: '', sourceIdentifier: '', events: [], active: true, description: '' });
+      setFormData({ name: '', sourceIdentifier: '', events: [], active: true, description: '', isInbound: true });
     } else {
-      setFormData({ name: '', url: '', events: ['article.*'], active: true, description: '' });
+      setFormData({ name: '', url: '', events: ['article.*'], active: true, description: '', isInbound: false });
     }
     setFormErrors({});
   }
@@ -302,7 +302,7 @@ export default function WebhooksPage() {
   function handleEdit(endpoint: WebhookEndpointListItem) {
     api.webhooks.get(endpoint.id).then((full) => {
       setEditingEndpoint(full);
-      const isInbound = !full.url.startsWith('http');
+      const isInbound = full.is_inbound;
       setMode(isInbound ? 'inbound' : 'outbound');
       setFormData({
         name: full.name,
@@ -422,7 +422,8 @@ export default function WebhooksPage() {
                 </tr>
               ) : (
                 endpoints.map((endpoint) => {
-                  const isInbound = !endpoint.url.startsWith('http');
+                  const isInbound = endpoint.is_inbound;
+                  const displayUrl = isInbound ? endpoint.inbound_url : endpoint.url;
                   return (
                     <tr key={endpoint.id} className="hover:bg-gray-50">
                       <td className="py-4 px-4">
@@ -439,7 +440,18 @@ export default function WebhooksPage() {
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                               Inbound
                             </span>
-                            <p className="text-sm text-gray-500 mt-1 font-mono truncate max-w-xs">{endpoint.url}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <p className="text-sm text-gray-500 font-mono truncate max-w-xs">{displayUrl || 'Generating...'}</p>
+                              {displayUrl && (
+                                <button
+                                  onClick={() => navigator.clipboard.writeText(displayUrl)}
+                                  className="p-1.5 text-gray-400 hover:text-brand-primary hover:bg-gray-100 rounded transition"
+                                  title="Copy inbound URL"
+                                >
+                                  <Copy size={14} />
+                                </button>
+                              )}
+                            </div>
                           </React.Fragment>
                         ) : (
                           <React.Fragment>
