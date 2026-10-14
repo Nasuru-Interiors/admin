@@ -6,7 +6,6 @@ import {
   Plus,
   Edit,
   Trash2,
-  RefreshCw,
   ExternalLink,
   Copy,
   Check,
@@ -18,10 +17,6 @@ import {
   Eye,
   EyeOff,
   Loader2,
-  ChevronDown,
-  ChevronUp,
-  MoreHorizontal,
-  Settings,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import type {
@@ -30,7 +25,6 @@ import type {
   WebhookDelivery,
   WebhookDeliveryStats,
   WebhookEvent,
-  WebhookTestRequest,
 } from '@/lib/types';
 
 function Modal({ isOpen, onClose, title, children }: { isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }) {
@@ -80,11 +74,6 @@ const STATUS_COLORS = {
   exhausted: 'bg-gray-100 text-gray-800',
 };
 
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleString();
-}
-
 function formatRelativeTime(dateStr: string | null): string {
   if (!dateStr) return '—';
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -103,13 +92,34 @@ function getDeliveryStatus(delivery: WebhookDelivery): 'delivered' | 'failed' | 
   return 'pending';
 }
 
-function SecretDisplay({ secret, onCopy }: { secret: string; onCopy: () => void }) {
+function SecretDisplay({ endpointId, onReveal }: { endpointId: string; onReveal: (id: string) => void }) {
   const [visible, setVisible] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [secret, setSecret] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleReveal = async () => {
+    if (visible) {
+      setVisible(false);
+      setSecret(null);
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await api.webhooks.get(endpointId);
+      setSecret(data.secret);
+      setVisible(true);
+      onReveal(endpointId);
+    } catch (err) {
+      console.error('Failed to fetch secret:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCopy = async () => {
+    if (!secret) return;
     await navigator.clipboard.writeText(secret);
-    onCopy();
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -118,20 +128,23 @@ function SecretDisplay({ secret, onCopy }: { secret: string; onCopy: () => void 
     <div className="flex items-center gap-2">
       <input
         type={visible ? 'text' : 'password'}
-        value={secret}
+        value={secret || ''}
         readOnly
         className="flex-1 font-mono text-sm bg-white/50 px-3 py-2 rounded border border-gray-200"
+        placeholder={visible ? 'Loading...' : 'Click to reveal'}
       />
       <button
         onClick={handleCopy}
-        className="px-3 py-2 bg-brand-primary text-white rounded hover:bg-brand-primary/90 transition text-sm"
+        disabled={!secret || loading}
+        className="px-3 py-2 bg-brand-primary text-white rounded hover:bg-brand-primary/90 transition text-sm disabled:opacity-50"
         aria-label="Copy secret"
       >
         {copied ? <Check size={16} /> : <Copy size={16} />}
       </button>
       <button
-        onClick={() => setVisible(!visible)}
-        className="p-2 text-gray-500 hover:text-gray-700"
+        onClick={handleReveal}
+        disabled={loading}
+        className="p-2 text-gray-500 hover:text-gray-700 disabled:opacity-50"
         aria-label={visible ? 'Hide secret' : 'Show secret'}
       >
         {visible ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -177,8 +190,8 @@ export default function WebhooksPage() {
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [testing, setTesting] = useState(false);
   const [showSecret, setShowSecret] = useState<string | null>(null);
+  const [mode, setMode] = useState<'outbound' | 'inbound'>('outbound');
 
-  // Form states
   const [formData, setFormData] = useState<Partial<WebhookEndpoint>>({
     name: '',
     url: '',
@@ -241,17 +254,29 @@ export default function WebhooksPage() {
     setFormErrors({});
 
     if (!formData.name?.trim()) setFormErrors({ name: 'Name is required' });
-    if (!formData.url?.trim()) setFormErrors({ url: 'URL is required' });
-    else {
-      try { new URL(formData.url); } catch { setFormErrors({ url: 'Invalid URL' }); }
+
+    if (mode === 'outbound') {
+      if (!formData.url?.trim()) setFormErrors({ url: 'URL is required' });
+      else {
+        try { new URL(formData.url); } catch { setFormErrors({ url: 'Invalid URL' }); }
+      }
+      if (!formData.events?.length) setFormErrors({ events: 'Select at least one event' });
+    } else {
+      if (!formData.sourceIdentifier?.trim()) setFormErrors({ sourceIdentifier: 'Source identifier is required' });
+      else if (!/^[a-zA-Z0-9_-]+$/.test(formData.sourceIdentifier)) {
+        setFormErrors({ sourceIdentifier: 'Only letters, numbers, underscore, hyphen allowed' });
+      }
     }
-    if (!formData.events?.length) setFormErrors({ events: 'Select at least one event' });
 
     if (Object.keys(formErrors).length) return;
 
+    const submitData = mode === 'inbound'
+      ? { ...formData, url: formData.sourceIdentifier, events: [] }
+      : formData;
+
     const submit = editingEndpoint
-      ? api.webhooks.update(editingEndpoint.id, formData)
-      : api.webhooks.create(formData);
+      ? api.webhooks.update(editingEndpoint.id, submitData)
+      : api.webhooks.create(submitData);
 
     submit
       .then(() => {
@@ -266,16 +291,23 @@ export default function WebhooksPage() {
   }
 
   function resetForm() {
-    setFormData({ name: '', url: '', events: ['article.*'], active: true, description: '' });
+    if (mode === 'inbound') {
+      setFormData({ name: '', sourceIdentifier: '', events: [], active: true, description: '' });
+    } else {
+      setFormData({ name: '', url: '', events: ['article.*'], active: true, description: '' });
+    }
     setFormErrors({});
   }
 
   function handleEdit(endpoint: WebhookEndpointListItem) {
     api.webhooks.get(endpoint.id).then((full) => {
       setEditingEndpoint(full);
+      const isInbound = !full.url.startsWith('http');
+      setMode(isInbound ? 'inbound' : 'outbound');
       setFormData({
         name: full.name,
         url: full.url,
+        sourceIdentifier: full.url,
         events: full.events,
         active: full.active,
         description: full.description || '',
@@ -353,12 +385,11 @@ export default function WebhooksPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="page-title">Webhooks</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Configure webhook endpoints to receive real-time article events
+            Configure webhook endpoints for article events (outbound) or external publishing (inbound)
           </p>
         </div>
         <button
@@ -369,16 +400,15 @@ export default function WebhooksPage() {
         </button>
       </div>
 
-      {/* Endpoints List */}
       <div className="card">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-100 text-left text-sm font-medium text-gray-500">
-                <th className="pb-3 px-4">Name / URL</th>
-                <th className="pb-3 px-4">Events</th>
+                <th className="pb-3 px-4">Name</th>
+                <th className="pb-3 px-4">Type / Target</th>
+                <th className="pb-3 px-4">Events / Source</th>
                 <th className="pb-3 px-4">Status</th>
-                <th className="pb-3 px-4">Deliveries</th>
                 <th className="pb-3 px-4">Secret</th>
                 <th className="pb-3 px-4 text-right">Actions</th>
               </tr>
@@ -391,85 +421,124 @@ export default function WebhooksPage() {
                   </td>
                 </tr>
               ) : (
-                endpoints.map((endpoint) => (
-                  <tr key={endpoint.id} className="hover:bg-gray-50">
-                    <td className="py-4 px-4">
-                      <div>
-                        <p className="font-medium text-gray-900">{endpoint.name}</p>
-                        <p className="text-sm text-gray-500 truncate max-w-xs">{endpoint.url}</p>
-                        {endpoint.description && (
-                          <p className="text-xs text-gray-400 mt-1">{endpoint.description}</p>
+                endpoints.map((endpoint) => {
+                  const isInbound = !endpoint.url.startsWith('http');
+                  return (
+                    <tr key={endpoint.id} className="hover:bg-gray-50">
+                      <td className="py-4 px-4">
+                        <div>
+                          <p className="font-medium text-gray-900">{endpoint.name}</p>
+                          {endpoint.description && (
+                            <p className="text-xs text-gray-400 mt-1">{endpoint.description}</p>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        {isInbound ? (
+                          <React.Fragment>
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                              Inbound
+                            </span>
+                            <p className="text-sm text-gray-500 mt-1 font-mono truncate max-w-xs">{endpoint.url}</p>
+                          </React.Fragment>
+                        ) : (
+                          <React.Fragment>
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              Outbound
+                            </span>
+                            <p className="text-sm text-gray-500 mt-1 truncate max-w-xs">{endpoint.url}</p>
+                          </React.Fragment>
                         )}
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex flex-wrap gap-1">
-                        {endpoint.events.map((e) => (
-                          <EventBadge key={e} event={e} />
-                        ))}
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        endpoint.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
-                      }`}>
-                        {endpoint.active ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4">
-                      <button
-                        onClick={() => setViewingDeliveries(viewingDeliveries === endpoint.id ? null : endpoint.id)}
-                        className="text-sm text-brand-primary hover:underline flex items-center gap-1"
-                      >
-                        <ExternalLink size={14} /> View
-                      </button>
-                    </td>
-                    <td className="py-4 px-4">
-                      <SecretDisplay
-                        secret={endpoint.id === showSecret ? '••••••••••••••••' : 'Click to reveal'}
-                        onCopy={() => {}}
-                      />
-                    </td>
-                    <td className="py-4 px-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleTest(endpoint, 'article.created')}
-                          className="p-2 text-gray-500 hover:text-brand-primary hover:bg-gray-100 rounded transition"
-                          title="Test webhook"
-                        >
-                          <Send size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleRegenerateSecret(endpoint.id)}
-                          className="p-2 text-gray-500 hover:text-yellow-600 hover:bg-gray-100 rounded transition"
-                          title="Regenerate secret"
-                        >
-                          <RotateCcw size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleEdit(endpoint)}
-                          className="p-2 text-gray-500 hover:text-brand-primary hover:bg-gray-100 rounded transition"
-                          title="Edit"
-                        >
-                          <Edit size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(endpoint.id)}
-                          className="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded transition"
-                          title="Delete"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="py-4 px-4">
+                        {isInbound ? (
+                          <span className="text-sm text-gray-500">Receives article.publish</span>
+                        ) : (
+                          <div className="flex flex-wrap gap-1">
+                            {endpoint.events.map((e) => (
+                              <EventBadge key={e} event={e} />
+                            ))}
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          endpoint.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {endpoint.active ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <SecretDisplay endpointId={endpoint.id} onReveal={setShowSecret} />
+                      </td>
+                      <td className="py-4 px-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {isInbound ? (
+                            <React.Fragment>
+                              <button
+                                onClick={() => handleRegenerateSecret(endpoint.id)}
+                                className="p-2 text-gray-500 hover:text-yellow-600 hover:bg-gray-100 rounded transition"
+                                title="Regenerate secret"
+                              >
+                                <RotateCcw size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleEdit(endpoint)}
+                                className="p-2 text-gray-500 hover:text-brand-primary hover:bg-gray-100 rounded transition"
+                                title="Edit"
+                              >
+                                <Edit size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(endpoint.id)}
+                                className="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded transition"
+                                title="Delete"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </React.Fragment>
+                          ) : (
+                            <React.Fragment>
+                              <button
+                                onClick={() => handleTest(endpoint, 'article.created')}
+                                className="p-2 text-gray-500 hover:text-brand-primary hover:bg-gray-100 rounded transition"
+                                title="Test webhook"
+                              >
+                                <Send size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleRegenerateSecret(endpoint.id)}
+                                className="p-2 text-gray-500 hover:text-yellow-600 hover:bg-gray-100 rounded transition"
+                                title="Regenerate secret"
+                              >
+                                <RotateCcw size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleEdit(endpoint)}
+                                className="p-2 text-gray-500 hover:text-brand-primary hover:bg-gray-100 rounded transition"
+                                title="Edit"
+                              >
+                                <Edit size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(endpoint.id)}
+                                className="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded transition"
+                                title="Delete"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </React.Fragment>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
 
-        {/* Deliveries Drawer */}
         {viewingDeliveries && (
           <div className="border-t border-gray-100 pt-4 mt-4">
             <div className="flex items-center justify-between mb-4">
@@ -482,7 +551,6 @@ export default function WebhooksPage() {
               </button>
             </div>
 
-            {/* Stats */}
             {stats && (
               <div className="grid grid-cols-5 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
                 <div className="text-center">
@@ -508,7 +576,6 @@ export default function WebhooksPage() {
               </div>
             )}
 
-            {/* Deliveries Table */}
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -595,132 +662,191 @@ export default function WebhooksPage() {
           </div>
         )}
       </div>
-      {/* Create/Edit Webhook Modal */}
+
       <Modal
         isOpen={showCreateModal}
         onClose={() => { setShowCreateModal(false); resetForm(); setEditingEndpoint(null); }}
         title={editingEndpoint ? 'Edit Webhook' : 'Add Webhook'}
       >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="label">Name</label>
-          <input
-            type="text"
-            value={formData.name || ''}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="input"
-            placeholder="e.g. My CMS"
-            required
-          />
-          {formErrors.name && <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>}
-        </div>
-        <div>
-          <label className="label">URL</label>
-          <input
-            type="url"
-            value={formData.url || ''}
-            onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-            className="input"
-            placeholder="https://example.com/webhook"
-            required
-          />
-          {formErrors.url && <p className="mt-1 text-sm text-red-600">{formErrors.url}</p>}
-        </div>
-        <div>
-          <label className="label">Events</label>
-          <div className="flex flex-wrap gap-2">
-            {availableEvents.map((event) => (
-              <label
-                key={event}
-                className={`inline-flex items-center px-3 py-1.5 rounded border text-sm cursor-pointer transition ${
-                  formData.events?.includes(event)
-                    ? 'border-brand-primary bg-brand-primary/10 text-brand-primary'
-                    : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                }`}
-              >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="label">Webhook Type</label>
+            <div className="flex gap-4">
+              <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border cursor-pointer transition ${
+                mode === 'outbound' ? 'border-brand-primary bg-brand-primary/10 text-brand-primary' : 'border-gray-200 hover:border-gray-300'
+              }`}>
                 <input
-                  type="checkbox"
-                  checked={formData.events?.includes(event) || false}
-                  onChange={() => toggleEvent(event)}
-                  className="mr-2 h-4 w-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary"
+                  type="radio"
+                  name="webhookMode"
+                  value="outbound"
+                  checked={mode === 'outbound'}
+                  onChange={() => setMode('outbound')}
+                  className="h-4 w-4 text-brand-primary border-gray-300 focus:ring-brand-primary"
                 />
-                {EVENT_LABELS[event]}
+                <div>
+                  <p className="font-medium">Outbound</p>
+                  <p className="text-xs text-gray-500">Our site → External system</p>
+                </div>
               </label>
-            ))}
+              <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border cursor-pointer transition ${
+                mode === 'inbound' ? 'border-brand-primary bg-brand-primary/10 text-brand-primary' : 'border-gray-200 hover:border-gray-300'
+              }`}>
+                <input
+                  type="radio"
+                  name="webhookMode"
+                  value="inbound"
+                  checked={mode === 'inbound'}
+                  onChange={() => setMode('inbound')}
+                  className="h-4 w-4 text-brand-primary border-gray-300 focus:ring-brand-primary"
+                />
+                <div>
+                  <p className="font-medium">Inbound</p>
+                  <p className="text-xs text-gray-500">External system → Our site (publish articles)</p>
+                </div>
+              </label>
+            </div>
           </div>
-          {formErrors.events && <p className="mt-1 text-sm text-red-600">{formErrors.events}</p>}
-        </div>
-        <div>
-          <label className="flex items-center gap-2 cursor-pointer">
+
+          <div>
+            <label className="label">Name</label>
             <input
-              type="checkbox"
-              checked={formData.active ?? true}
-              onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-              className="h-4 w-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary"
+              type="text"
+              value={formData.name || ''}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="input"
+              placeholder="e.g. My CMS"
+              required
             />
-            <span className="text-sm text-gray-700">Active</span>
-          </label>
-        </div>
-        <div>
-          <label className="label">Description (optional)</label>
-          <textarea
-            value={formData.description || ''}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="input"
-            rows={3}
-            placeholder="Optional description for this webhook"
-          />
-        </div>
-        {formErrors.submit && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-            {formErrors.submit}
+            {formErrors.name && <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>}
           </div>
-        )}
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-          <button
-            type="button"
-            onClick={() => { setShowCreateModal(false); resetForm(); setEditingEndpoint(null); }}
-            className="btn btn-secondary"
-          >
-            Cancel
-          </button>
-          <button type="submit" className="btn btn-primary" disabled={Object.keys(formErrors).length > 0}>
-            {editingEndpoint ? 'Save Changes' : 'Create Webhook'}
-          </button>
-        </div>
-      </form>
-    </Modal>
 
-    {/* Test Webhook Modal */}
-    <Modal isOpen={!!testModal} onClose={() => setTestModal(null)} title="Test Webhook">
-      <div className="space-y-4">
-        <p className="text-sm text-gray-600">
-          Send a test payload to <strong>{testModal?.endpoint.url}</strong> for event <strong>{EVENT_LABELS[testModal?.event || 'article.created']}</strong>
-        </p>
-        {testResult && (
-          <div className={`p-3 rounded text-sm ${testResult.success ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-            {testResult.message}
+          {mode === 'outbound' ? (
+            <React.Fragment>
+              <div>
+                <label className="label">Target URL</label>
+                <input
+                  type="url"
+                  value={formData.url || ''}
+                  onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                  className="input"
+                  placeholder="https://example.com/webhook"
+                  required
+                />
+                {formErrors.url && <p className="mt-1 text-sm text-red-600">{formErrors.url}</p>}
+              </div>
+              <div>
+                <label className="label">Events to Send</label>
+                <div className="flex flex-wrap gap-2">
+                  {availableEvents.map((event) => (
+                    <label
+                      key={event}
+                      className={`inline-flex items-center px-3 py-1.5 rounded border text-sm cursor-pointer transition ${
+                        formData.events?.includes(event)
+                          ? 'border-brand-primary bg-brand-primary/10 text-brand-primary'
+                          : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.events?.includes(event) || false}
+                        onChange={() => toggleEvent(event)}
+                        className="mr-2 h-4 w-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary"
+                      />
+                      {EVENT_LABELS[event]}
+                    </label>
+                  ))}
+                </div>
+                {formErrors.events && <p className="mt-1 text-sm text-red-600">{formErrors.events}</p>}
+              </div>
+            </React.Fragment>
+          ) : (
+            <div>
+              <label className="label">Source Identifier</label>
+              <input
+                type="text"
+                value={formData.sourceIdentifier || ''}
+                onChange={(e) => setFormData({ ...formData, sourceIdentifier: e.target.value })}
+                className="input"
+                placeholder="my-cms, zapier, contentful, etc."
+                required
+                pattern="[a-zA-Z0-9_-]+"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Used in <code>X-Webhook-Source</code> header. Letters, numbers, underscore, hyphen only.
+              </p>
+              {formErrors.sourceIdentifier && <p className="mt-1 text-sm text-red-600">{formErrors.sourceIdentifier}</p>}
+            </div>
+          )}
+
+          <div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.active ?? true}
+                onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                className="h-4 w-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary"
+              />
+              <span className="text-sm text-gray-700">Active</span>
+            </label>
           </div>
-        )}
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-          <button onClick={() => setTestModal(null)} className="btn btn-secondary">Close</button>
-          <button
-            onClick={handleTestSubmit}
-            disabled={testing}
-            className="btn btn-primary"
-          >
-            {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Send Test'}
-          </button>
-        </div>
-      </div>
-    </Modal>
+          <div>
+            <label className="label">Description (optional)</label>
+            <textarea
+              value={formData.description || ''}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="input"
+              rows={3}
+              placeholder="Optional description for this webhook"
+            />
+          </div>
+          {formErrors.submit && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+              {formErrors.submit}
+            </div>
+          )}
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+            <button
+              type="button"
+              onClick={() => { setShowCreateModal(false); resetForm(); setEditingEndpoint(null); }}
+              className="btn btn-secondary"
+            >
+              Cancel
+            </button>
+            <button type="submit" className="btn btn-primary" disabled={Object.keys(formErrors).length > 0}>
+              {editingEndpoint ? 'Save Changes' : 'Create Webhook'}
+            </button>
+          </div>
+        </form>
+      </Modal>
 
-    {/* Secret Copied Toast */}
-    {showSecret && (
-      <div className="fixed bottom-4 right-4 z-50 animate-slide-in p-3 bg-green-600 text-white rounded-lg shadow-lg">
-        Secret copied to clipboard!
-      </div>
-    )}
-  </div>
+      <Modal isOpen={!!testModal} onClose={() => setTestModal(null)} title="Test Webhook">
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            Send a test payload to <strong>{testModal?.endpoint.url}</strong> for event <strong>{EVENT_LABELS[testModal?.event || 'article.created']}</strong>
+          </p>
+          {testResult && (
+            <div className={`p-3 rounded text-sm ${testResult.success ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+              {testResult.message}
+            </div>
+          )}
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+            <button onClick={() => setTestModal(null)} className="btn btn-secondary">Close</button>
+            <button
+              onClick={handleTestSubmit}
+              disabled={testing}
+              className="btn btn-primary"
+            >
+              {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Send Test'}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {showSecret && (
+        <div className="fixed bottom-4 right-4 z-50 animate-slide-in p-3 bg-green-600 text-white rounded-lg shadow-lg">
+          Secret copied to clipboard!
+        </div>
+      )}
+    </div>
   );
 }

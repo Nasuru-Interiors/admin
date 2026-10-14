@@ -117,6 +117,7 @@ export interface WebhookEndpoint {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  sourceIdentifier?: string;
 }
 
 export interface WebhookEndpointListItem {
@@ -129,6 +130,7 @@ export interface WebhookEndpointListItem {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  sourceIdentifier?: string;
 }
 
 export interface WebhookDelivery {
