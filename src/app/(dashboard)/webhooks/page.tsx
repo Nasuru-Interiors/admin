@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Plus,
@@ -18,7 +18,6 @@ import {
   Eye,
   EyeOff,
   Loader2,
-  Filter,
   ChevronDown,
   ChevronUp,
   MoreHorizontal,
@@ -33,6 +32,26 @@ import type {
   WebhookEvent,
   WebhookTestRequest,
 } from '@/lib/types';
+
+function Modal({ isOpen, onClose, title, children }: { isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }) {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="fixed inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative mx-auto my-20 max-w-lg w-full px-4">
+        <div className="bg-white rounded-xl shadow-xl">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1">
+              <X size={20} />
+            </button>
+          </div>
+          <div className="p-6">{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const EVENT_LABELS: Record<WebhookEvent, string> = {
   'article.created': 'Article Created',
@@ -576,6 +595,132 @@ export default function WebhooksPage() {
           </div>
         )}
       </div>
-    </div>
+      {/* Create/Edit Webhook Modal */}
+      <Modal
+        isOpen={showCreateModal}
+        onClose={() => { setShowCreateModal(false); resetForm(); setEditingEndpoint(null); }}
+        title={editingEndpoint ? 'Edit Webhook' : 'Add Webhook'}
+      >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="label">Name</label>
+          <input
+            type="text"
+            value={formData.name || ''}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            className="input"
+            placeholder="e.g. My CMS"
+            required
+          />
+          {formErrors.name && <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>}
+        </div>
+        <div>
+          <label className="label">URL</label>
+          <input
+            type="url"
+            value={formData.url || ''}
+            onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+            className="input"
+            placeholder="https://example.com/webhook"
+            required
+          />
+          {formErrors.url && <p className="mt-1 text-sm text-red-600">{formErrors.url}</p>}
+        </div>
+        <div>
+          <label className="label">Events</label>
+          <div className="flex flex-wrap gap-2">
+            {availableEvents.map((event) => (
+              <label
+                key={event}
+                className={`inline-flex items-center px-3 py-1.5 rounded border text-sm cursor-pointer transition ${
+                  formData.events?.includes(event)
+                    ? 'border-brand-primary bg-brand-primary/10 text-brand-primary'
+                    : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={formData.events?.includes(event) || false}
+                  onChange={() => toggleEvent(event)}
+                  className="mr-2 h-4 w-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary"
+                />
+                {EVENT_LABELS[event]}
+              </label>
+            ))}
+          </div>
+          {formErrors.events && <p className="mt-1 text-sm text-red-600">{formErrors.events}</p>}
+        </div>
+        <div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.active ?? true}
+              onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+              className="h-4 w-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary"
+            />
+            <span className="text-sm text-gray-700">Active</span>
+          </label>
+        </div>
+        <div>
+          <label className="label">Description (optional)</label>
+          <textarea
+            value={formData.description || ''}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            className="input"
+            rows={3}
+            placeholder="Optional description for this webhook"
+          />
+        </div>
+        {formErrors.submit && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+            {formErrors.submit}
+          </div>
+        )}
+        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+          <button
+            type="button"
+            onClick={() => { setShowCreateModal(false); resetForm(); setEditingEndpoint(null); }}
+            className="btn btn-secondary"
+          >
+            Cancel
+          </button>
+          <button type="submit" className="btn btn-primary" disabled={Object.keys(formErrors).length > 0}>
+            {editingEndpoint ? 'Save Changes' : 'Create Webhook'}
+          </button>
+        </div>
+      </form>
+    </Modal>
+
+    {/* Test Webhook Modal */}
+    <Modal isOpen={!!testModal} onClose={() => setTestModal(null)} title="Test Webhook">
+      <div className="space-y-4">
+        <p className="text-sm text-gray-600">
+          Send a test payload to <strong>{testModal?.endpoint.url}</strong> for event <strong>{EVENT_LABELS[testModal?.event || 'article.created']}</strong>
+        </p>
+        {testResult && (
+          <div className={`p-3 rounded text-sm ${testResult.success ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+            {testResult.message}
+          </div>
+        )}
+        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+          <button onClick={() => setTestModal(null)} className="btn btn-secondary">Close</button>
+          <button
+            onClick={handleTestSubmit}
+            disabled={testing}
+            className="btn btn-primary"
+          >
+            {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Send Test'}
+          </button>
+        </div>
+      </div>
+    </Modal>
+
+    {/* Secret Copied Toast */}
+    {showSecret && (
+      <div className="fixed bottom-4 right-4 z-50 animate-slide-in p-3 bg-green-600 text-white rounded-lg shadow-lg">
+        Secret copied to clipboard!
+      </div>
+    )}
+  </div>
   );
 }
