@@ -15,6 +15,7 @@ import {
   LogOut,
   Menu,
   X,
+  Webhook,
   type LucideIcon,
 } from 'lucide-react';
 import { logout, getAdminEmail } from '@/lib/auth';
@@ -34,6 +35,7 @@ const NAV: NavItem[] = [
   { href: '/carousel', label: 'Carousel', icon: GalleryHorizontalEnd },
   { href: '/appearance', label: 'Appearance', icon: Palette },
   { href: '/about', label: 'About Page', icon: Info },
+  { href: '/webhooks', label: 'Webhooks', icon: Webhook },
   { href: '/settings', label: 'Business & SEO', icon: Settings },
 ];
 

@@ -96,3 +96,75 @@ export interface Stats {
   carousel: number;
   categories: number;
 }
+
+export type WebhookEvent =
+  | 'article.created'
+  | 'article.updated'
+  | 'article.published'
+  | 'article.unpublished'
+  | 'article.deleted'
+  | 'article.*'
+  | '*';
+
+export interface WebhookEndpoint {
+  id: string;
+  name: string;
+  url: string;
+  secret: string;
+  events: WebhookEvent[];
+  active: boolean;
+  description: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WebhookEndpointListItem {
+  id: string;
+  name: string;
+  url: string;
+  events: WebhookEvent[];
+  active: boolean;
+  description: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WebhookDelivery {
+  id: string;
+  endpoint_id: string;
+  event_type: string;
+  payload: unknown;
+  response_status: number | null;
+  response_body: string | null;
+  response_headers: Record<string, string> | null;
+  attempt: number;
+  max_attempts: number;
+  next_retry_at: string | null;
+  delivered_at: string | null;
+  failed_at: string | null;
+  error_message: string | null;
+  created_at: string;
+}
+
+export interface WebhookDeliveryStats {
+  total: number;
+  delivered: number;
+  failed: number;
+  pending: number;
+  exhausted: number;
+}
+
+export interface WebhookTestRequest {
+  endpoint_id: string;
+  event_type?: WebhookEvent;
+  payload?: Record<string, unknown>;
+}
+
+export interface WebhookTestResponse {
+  success: boolean;
+  status: number | null;
+  response: string | null;
+  error: string | null;
+}
