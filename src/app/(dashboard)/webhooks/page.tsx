@@ -769,7 +769,7 @@ export default function WebhooksPage() {
                 className="input"
                 placeholder="my-cms, zapier, contentful, etc."
                 required
-                pattern="[a-zA-Z0-9_-]+"
+                pattern="[a-zA-Z0-9_\-]+"
               />
               <p className="mt-1 text-xs text-gray-500">
                 Used in <code>X-Webhook-Source</code> header. Letters, numbers, underscore, hyphen only.
